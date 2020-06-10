@@ -1,0 +1,75 @@
+        if(MainBusinessPlanMap.containsKey(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c)){
+            opWrapper = MainBusinessPlanMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c);
+            opWrapper.ACVRenewal = MainBusinessPlanMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).ACVRenewal + TotalACVRenewal;
+            opWrapper.NewBusinessBookings = MainBusinessPlanMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).NewBusinessBookings+NewBusiness;
+            //Calculating rollup sum of TotalBookings and storing it into wrapper
+            opWrapper.ACV_First_Year = MainBusinessPlanMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).ACV_First_Year + ACVFirstYrTotal;
+            if(op.AccountId!=null){
+                if(mapParentAccAccount.containskey(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c)){
+                    mapParentAccAccount.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).add(op.AccountId);
+                    if(op.ACV_First_Year_Sub_Renewal__c > 0 || op.ACV_First_Year_Maint_Renewal__c > 0){
+                        opWrapper.RenewalCustomerCount = mapParentAccAccount.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size(); 
+                    }
+                    opWrapper.Unique_Numbers_of_Customers=mapParentAccAccount.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size();
+                }
+	            else{
+				
+                    set<id> newset=new set<id>();
+                    newset.add(op.AccountId);
+                    
+					mapParentAccAccount.put(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c,newset);
+                    if(op.ACV_First_Year_Sub_Renewal__c > 0 || op.ACV_First_Year_Maint_Renewal__c > 0){
+                        opWrapper.RenewalCustomerCount = mapParentAccAccount.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size();
+                    }
+                    opWrapper.Unique_Numbers_of_Customers=mapParentAccAccount.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size();
+                    
+                }
+				if(partnerAccMap.containskey(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c)){
+                    if(op.ACV_First_Year_Sub_Renewal__c > 0 || op.ACV_First_Year_Maint_Renewal__c > 0){
+                        partnerAccMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).add(op.AccountId);
+						opWrapper.RenewalCustomerCount = partnerAccMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size(); 
+	                }
+                }
+	            else{
+                    set<id> newset=new set<id>();
+                    newset.add(op.AccountId);
+                    
+                    if(op.ACV_First_Year_Sub_Renewal__c > 0 || op.ACV_First_Year_Maint_Renewal__c > 0){
+					    partnerAccMap.put(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c,newset);
+                        opWrapper.RenewalCustomerCount = partnerAccMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size();
+                    }
+                 }
+            }
+            
+        }
+        else{
+            opWrapper.ACVRenewal = TotalACVRenewal;
+            if(op.ACV_First_Year_Renewal_Total__c > 0){
+                system.debug('firstTime ==' + AccountId);
+                opWrapper.RenewalCustomerCount = 1;
+            }
+            opWrapper.NewBusinessBookings = NewBusiness;
+            opWrapper.ACV_First_Year=ACVFirstYrTotal;
+            if(op.AccountId!=null){
+			    if(op.ACV_First_Year_Sub_Renewal__c > 0 || op.ACV_First_Year_Maint_Renewal__c > 0){
+				    set<id> accountIds=new set<id>();
+                    accountIds.add(op.AccountId);
+				    partnerAccMap.put(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c,accountIds);
+                    opWrapper.RenewalCustomerCount = partnerAccMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size(); 
+                }
+                set<id> newset=new set<id>();
+                newset.add(op.AccountId);
+                mapParentAccAccount.put(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c,newset);
+                opWrapper.Unique_Numbers_of_Customers=mapParentAccAccount.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c).size();
+            }
+            
+        }
+        
+        system.debug('Account_mapParentAccAccount++'+mapParentAccAccount);  
+        system.debug('test++'+opWrapper);
+        system.debug('MainBusinessPlanMap++'+MainBusinessPlanMap);
+        
+        MainBusinessPlanMap.put(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c, opWrapper);
+        system.debug('map value ==2 ' + MainBusinessPlanMap.get(AccountId+ '_' +CloseYear+ '_' +op.Current_Quarter__c));
+        return MainBusinessPlanMap; 
+    }
